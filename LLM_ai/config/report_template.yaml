@@ -1,0 +1,45 @@
+# 报告模板配置
+
+sections:
+  - id: cover
+    title: "封面"
+    enabled: true
+
+  - id: toc
+    title: "目录"
+    enabled: true
+
+  - id: executive_summary
+    title: "执行摘要"
+    description: "概述测试范围、关键发现和总体风险评估"
+    enabled: true
+
+  - id: scope
+    title: "测试范围"
+    description: "测试目标、时间、方法论"
+    enabled: true
+
+  - id: asset_inventory
+    title: "资产清单"
+    description: "发现的所有主机、端口、服务"
+    enabled: true
+
+  - id: vulnerability_findings
+    title: "漏洞详情"
+    description: "按风险等级排序的漏洞列表"
+    enabled: true
+    sub_sections:
+      - vulnerability_description
+      - reproduction_steps
+      - impact_analysis
+      - remediation
+
+  - id: risk_matrix
+    title: "风险矩阵"
+    description: "漏洞风险等级分布统计"
+    enabled: true
+
+  - id: appendix
+    title: "附录"
+    description: "工具输出原文、扫描配置等"
+    enabled: false

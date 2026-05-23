@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE nmaprun>
+<nmaprun scanner="nmap" args="nmap -sV -sC -oX nmap_scan.xml 192.168.1.0/24" start="1715500000" startstr="Tue May 12 10:00:00 2026">
+  <host starttime="1715500010" endtime="1715500050">
+    <status state="up" reason="echo-reply"/>
+    <address addr="192.168.1.100" addrtype="ipv4"/>
+    <hostnames><hostname name="web-server.local"/></hostnames>
+    <ports>
+      <port protocol="tcp" portid="22">
+        <state state="open" reason="syn-ack"/>
+        <service name="ssh" product="OpenSSH" version="8.4p1" extrainfo="Ubuntu"/>
+      </port>
+      <port protocol="tcp" portid="80">
+        <state state="open" reason="syn-ack"/>
+        <service name="http" product="Apache httpd" version="2.4.51"/>
+      </port>
+      <port protocol="tcp" portid="443">
+        <state state="open" reason="syn-ack"/>
+        <service name="https" product="Apache httpd" version="2.4.51"/>
+      </port>
+      <port protocol="tcp" portid="3306">
+        <state state="open" reason="syn-ack"/>
+        <service name="mysql" product="MySQL" version="8.0.27"/>
+      </port>
+    </ports>
+    <script id="vulners" output="Found CVEs">
+      <table key="cpe:/a:apache:http_server:2.4.51">
+        <table>
+          <elem key="id">CVE-2021-44790</elem>
+          <elem key="CVSS">9.8</elem>
+        </table>
+        <table>
+          <elem key="id">CVE-2021-42013</elem>
+          <elem key="CVSS">9.8</elem>
+        </table>
+      </table>
+    </script>
+  </host>
+  <host starttime="1715500060" endtime="1715500100">
+    <status state="up" reason="echo-reply"/>
+    <address addr="192.168.1.101" addrtype="ipv4"/>
+    <hostnames><hostname name="db-server.local"/></hostnames>
+    <ports>
+      <port protocol="tcp" portid="3306">
+        <state state="open" reason="syn-ack"/>
+        <service name="mysql" product="MySQL" version="5.7.36"/>
+      </port>
+      <port protocol="tcp" portid="6379">
+        <state state="open" reason="syn-ack"/>
+        <service name="redis" product="Redis" version="6.2.6"/>
+      </port>
+    </ports>
+  </host>
+  <runstats><finished timestr="Tue May 12 10:05:00 2026" elapsed="300" exit="success"/></runstats>
+</nmaprun>

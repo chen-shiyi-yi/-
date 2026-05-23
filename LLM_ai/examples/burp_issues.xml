@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<issues burpVersion="2024.1" exportTime="Mon May 12 10:30:00 CST 2026">
+  <issue>
+    <name>SQL injection</name>
+    <host>http://web-server.local</host>
+    <port>80</port>
+    <protocol>http</protocol>
+    <path>/api/users</path>
+    <issueBackground><![CDATA[SQL injection is a vulnerability that allows an attacker to interfere with the queries that an application makes to its database.]]></issueBackground>
+    <issueDetail><![CDATA[The application appears to be vulnerable to SQL injection. The parameter <b>id</b> in the URL <b>/api/users?id=1</b> appears to be vulnerable.]]></issueDetail>
+    <severity>High</severity>
+    <confidence>Certain</confidence>
+    <requestresponse>
+      <request><![CDATA[GET /api/users?id=1' OR '1'='1 HTTP/1.1
+Host: web-server.local
+User-Agent: Mozilla/5.0]]></request>
+      <response><![CDATA[HTTP/1.1 200 OK
+Content-Type: application/json
+
+[{"id":1,"username":"admin"},{"id":2,"username":"user1"}]]]></response>
+    </requestresponse>
+    <type>89</type>
+    <vulnerabilityClassifications><![CDATA[CWE-89: Improper Neutralization of Special Elements used in an SQL Command ('SQL Injection')
+OWASP Top Ten 2021 Category A03:2021 - Injection]]></vulnerabilityClassifications>
+    <remediationBackground><![CDATA[Use parameterized queries or prepared statements to prevent SQL injection.]]></remediationBackground>
+  </issue>
+  <issue>
+    <name>Cross-site scripting (reflected)</name>
+    <host>http://web-server.local</host>
+    <port>80</port>
+    <protocol>http</protocol>
+    <path>/search</path>
+    <issueBackground><![CDATA[Cross-site scripting (XSS) is a type of vulnerability that allows attackers to inject malicious scripts into web pages.]]></issueBackground>
+    <issueDetail><![CDATA[The value of the <b>q</b> parameter is copied into the HTML response.]]></issueDetail>
+    <severity>Medium</severity>
+    <confidence>Certain</confidence>
+    <requestresponse>
+      <request><![CDATA[GET /search?q=<script>alert('XSS')</script> HTTP/1.1
+Host: web-server.local]]></request>
+      <response><![CDATA[HTTP/1.1 200 OK
+Content-Type: text/html
+
+<html><body>Search results for: <script>alert('XSS')</script></body></html>]]></response>
+    </requestresponse>
+    <type>79</type>
+    <vulnerabilityClassifications><![CDATA[CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')
+OWASP Top Ten 2021 Category A03:2021 - Injection]]></vulnerabilityClassifications>
+    <remediationBackground><![CDATA[Implement input validation and output encoding.]]></remediationBackground>
+  </issue>
+  <issue>
+    <name>Information disclosure - sensitive information in URL</name>
+    <host>http://web-server.local</host>
+    <port>80</port>
+    <protocol>http</protocol>
+    <path>/api/login</path>
+    <issueBackground><![CDATA[Sensitive information in URLs can be logged or cached.]]></issueBackground>
+    <issueDetail><![CDATA[The URL contains sensitive information (session token) in the query string.]]></issueDetail>
+    <severity>Low</severity>
+    <confidence>Certain</confidence>
+    <type>200</type>
+    <vulnerabilityClassifications><![CDATA[CWE-200: Exposure of Sensitive Information to an Unauthorized Actor]]></vulnerabilityClassifications>
+    <remediationBackground><![CDATA[Move sensitive information from URLs to request bodies or headers.]]></remediationBackground>
+  </issue>
+</issues>

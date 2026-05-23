@@ -1,0 +1,39 @@
+# 渗透测试报告智能体 - 全局配置
+
+llm:
+  provider: claude
+  model: claude-sonnet-4-20250514
+  max_tokens: 4096
+  temperature: 0.3
+  # API key 从环境变量 ANTHROPIC_API_KEY 读取
+
+report:
+  # 默认输出格式: md, html, pdf, docx, all
+  default_format: md
+  # 报告语言
+  language: zh-CN
+  # 公司/团队信息（嵌入报告）
+  org:
+    name: "安全评估团队"
+    logo: ""
+
+rating:
+  # 风险等级阈值 (CVSS 分数)
+  thresholds:
+    critical: 9.0
+    high: 7.0
+    medium: 4.0
+    low: 0.1
+    info: 0.0
+
+parsers:
+  # 自动检测文件类型，也可手动指定
+  auto_detect: true
+  # 支持的文件扩展名映射
+  extensions:
+    ".xml": ["nmap", "burp", "metasploit"]
+    ".json": ["nuclei"]
+    ".jsonl": ["nuclei"]
+    ".log": ["sqlmap", "nikto"]
+    ".csv": ["sqlmap"]
+    ".txt": ["nikto"]

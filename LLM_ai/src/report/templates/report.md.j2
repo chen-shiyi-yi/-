@@ -1,0 +1,143 @@
+# {{ project.project_name }}
+
+**生成时间:** {{ generated_at }}
+{% if project.client %}**客户:** {{ project.client }}{% endif %}
+{% if project.tester %}**测试人员:** {{ project.tester }}{% endif %}
+{% if project.test_start %}**测试时间:** {{ project.test_start }} 至 {{ project.test_end }}{% endif %}
+{% if project.scope %}**测试范围:** {{ project.scope }}{% endif %}
+
+---
+
+## 1. 执行摘要
+
+{{ executive_summary }}
+
+---
+
+## 2. 发现统计
+
+| 严重等级 | 数量 | 占比 |
+|---------|------|------|
+| 🔴 严重 (Critical) | {{ stats.critical }} | {{ "%.1f" | format(stats.critical / stats.total_vulns * 100 if stats.total_vulns > 0 else 0) }}% |
+| 🟠 高危 (High) | {{ stats.high }} | {{ "%.1f" | format(stats.high / stats.total_vulns * 100 if stats.total_vulns > 0 else 0) }}% |
+| 🟡 中危 (Medium) | {{ stats.medium }} | {{ "%.1f" | format(stats.medium / stats.total_vulns * 100 if stats.total_vulns > 0 else 0) }}% |
+| 🟢 低危 (Low) | {{ stats.low }} | {{ "%.1f" | format(stats.low / stats.total_vulns * 100 if stats.total_vulns > 0 else 0) }}% |
+| 🔵 信息 (Info) | {{ stats.info }} | {{ "%.1f" | format(stats.info / stats.total_vulns * 100 if stats.total_vulns > 0 else 0) }}% |
+| **合计** | **{{ stats.total_vulns }}** | **100%** |
+
+---
+
+## 3. 资产清单
+
+共发现 **{{ stats.total_hosts }}** 台主机，**{{ stats.open_ports }}** 个开放端口。
+
+{% for host in hosts %}
+### 3.{{ loop.index }} {{ host.ip }}{% if host.hostname %} ({{ host.hostname }}){% endif %}
+
+{% if host.os %}**操作系统:** {{ host.os }}{% endif %}
+**状态:** {{ host.state }}
+
+{% if host.services %}
+| 端口 | 协议 | 服务 | 版本 | 状态 |
+|------|------|------|------|------|
+{% for svc in host.services %}
+| {{ svc.port }} | {{ svc.protocol }} | {{ svc.service }} | {{ svc.version }} | {{ svc.state }} |
+{% endfor %}
+{% endif %}
+
+{% endfor %}
+
+---
+
+## 4. 漏洞详情
+
+{% for vuln in vulnerabilities %}
+### 4.{{ loop.index }} [{{ severity_labels[vuln.severity.value] }}] {{ vuln.name }}
+
+**严重等级:** {{ severity_labels[vuln.severity.value] }}{% if vuln.cvss_score %} (CVSS: {{ vuln.cvss_score }}){% endif %}
+
+{% if vuln.cve_ids %}**CVE:** {{ vuln.cve_ids | join(", ") }}{% endif %}
+{% if vuln.cwe_ids %}**CWE:** {{ vuln.cwe_ids | join(", ") }}{% endif %}
+{% if vuln.owasp_category %}**OWASP:** {{ vuln.owasp_category }}{% endif %}
+**受影响资产:** {{ vuln.affected_asset }}
+{% if vuln.affected_component %}**受影响组件:** {{ vuln.affected_component }}{% endif %}
+
+#### 4.{{ loop.index }}.1 漏洞描述
+
+{{ vuln.description }}
+
+{% if vuln.reproduction_steps %}
+#### 4.{{ loop.index }}.2 复现步骤
+
+{% for step in vuln.reproduction_steps %}
+{{ loop.index }}. {{ step }}
+{% endfor %}
+{% endif %}
+
+{% if vuln.impact %}
+#### 4.{{ loop.index }}.3 影响分析
+
+{{ vuln.impact }}
+{% endif %}
+
+{% if vuln.remediation %}
+#### 4.{{ loop.index }}.4 修复建议
+
+{{ vuln.remediation }}
+{% endif %}
+
+---
+
+{% endfor %}
+
+## 5. 风险矩阵
+
+```
+严重 (Critical): {{ "#" * stats.critical }} {{ stats.critical }}
+高危 (High):     {{ "#" * stats.high }} {{ stats.high }}
+中危 (Medium):   {{ "#" * stats.medium }} {{ stats.medium }}
+低危 (Low):      {{ "#" * stats.low }} {{ stats.low }}
+信息 (Info):     {{ "#" * stats.info }} {{ stats.info }}
+```
+
+---
+
+## 6. 修复优先级建议
+
+### 6.1 立即修复（严重漏洞）
+{% for vuln in vulnerabilities if vuln.severity.value == "critical" %}
+- **{{ vuln.name }}**：{{ vuln.affected_asset }}
+{% endfor %}
+
+### 6.2 优先修复（高危漏洞）
+{% for vuln in vulnerabilities if vuln.severity.value == "high" %}
+- **{{ vuln.name }}**：{{ vuln.affected_asset }}
+{% endfor %}
+
+### 6.3 计划修复（中危漏洞）
+{% for vuln in vulnerabilities if vuln.severity.value == "medium" %}
+- **{{ vuln.name }}**：{{ vuln.affected_asset }}
+{% endfor %}
+
+---
+
+## 7. 附录
+
+### 7.1 工具说明
+本报告使用以下工具生成：
+- Nmap - 网络扫描和主机发现
+- Nuclei - 漏洞扫描
+- Burp Suite - Web 应用安全测试
+- SQLMap - SQL 注入检测
+- Nikto - Web 服务器扫描
+- Metasploit - 渗透测试框架
+
+### 7.2 参考标准
+- OWASP Top 10 2021
+- CVSS v3.1 评分标准
+- CWE/SANS Top 25
+
+---
+
+*本报告由渗透测试报告智能体自动生成*
+*报告生成时间: {{ generated_at }}*

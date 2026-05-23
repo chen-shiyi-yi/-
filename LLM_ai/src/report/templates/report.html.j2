@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ project.project_name }}</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            background: #f8f9fa;
+        }
+        .container { background: #fff; padding: 40px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); }
+        h1 { color: #1a1a2e; border-bottom: 3px solid #16213e; padding-bottom: 15px; margin-bottom: 30px; }
+        h2 { color: #16213e; margin: 30px 0 15px; padding-bottom: 8px; border-bottom: 2px solid #e9ecef; }
+        h3 { color: #0f3460; margin: 20px 0 10px; }
+        h4 { color: #495057; margin: 15px 0 8px; }
+        .meta { color: #6c757d; margin-bottom: 20px; }
+        .meta span { margin-right: 20px; }
+
+        /* 目录导航 */
+        .toc {
+            background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px;
+            padding: 20px; margin: 20px 0;
+        }
+        .toc h3 { margin-top: 0; color: #16213e; }
+        .toc ul { list-style: none; padding-left: 0; }
+        .toc li { padding: 5px 0; }
+        .toc a { color: #0f3460; text-decoration: none; }
+        .toc a:hover { text-decoration: underline; }
+
+        /* 搜索过滤 */
+        .search-filter {
+            background: #e9ecef; border-radius: 8px; padding: 15px; margin: 20px 0;
+        }
+        .search-filter input, .search-filter select {
+            padding: 8px 12px; border: 1px solid #ced4da; border-radius: 4px;
+            margin-right: 10px; font-size: 14px;
+        }
+        .search-filter button {
+            padding: 8px 16px; background: #16213e; color: #fff; border: none;
+            border-radius: 4px; cursor: pointer; font-size: 14px;
+        }
+        .search-filter button:hover { background: #0f3460; }
+
+        /* 统计卡片 */
+        .stats-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px; margin: 20px 0; }
+        .stat-card {
+            text-align: center; padding: 20px; border-radius: 8px; color: #fff;
+            transition: transform 0.2s;
+        }
+        .stat-card:hover { transform: translateY(-5px); }
+        .stat-card .number { font-size: 2em; font-weight: bold; }
+        .stat-card .label { font-size: 0.9em; opacity: 0.9; }
+        .stat-critical { background: #dc3545; }
+        .stat-high { background: #fd7e14; }
+        .stat-medium { background: #ffc107; color: #333; }
+        .stat-low { background: #28a745; }
+        .stat-info { background: #17a2b8; }
+
+        /* 表格 */
+        table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+        th, td { padding: 10px 12px; text-align: left; border: 1px solid #dee2e6; }
+        th { background: #16213e; color: #fff; position: sticky; top: 0; }
+        tr:nth-child(even) { background: #f8f9fa; }
+        tr:hover { background: #e9ecef; }
+
+        /* 漏洞卡片 */
+        .vuln-card {
+            border: 1px solid #dee2e6; border-radius: 8px; margin: 20px 0;
+            overflow: hidden; page-break-inside: avoid;
+            transition: box-shadow 0.2s;
+        }
+        .vuln-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .vuln-header {
+            padding: 15px 20px; color: #fff; display: flex;
+            justify-content: space-between; align-items: center;
+            cursor: pointer;
+        }
+        .vuln-body { padding: 20px; }
+        .vuln-meta { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 10px 0; }
+        .vuln-meta-item { font-size: 0.9em; }
+        .vuln-meta-item strong { color: #495057; }
+
+        .severity-critical { background: #dc3545; }
+        .severity-high { background: #fd7e14; }
+        .severity-medium { background: #ffc107; color: #333; }
+        .severity-low { background: #28a745; }
+        .severity-info { background: #17a2b8; }
+
+        .badge {
+            display: inline-block; padding: 3px 10px; border-radius: 12px;
+            font-size: 0.85em; font-weight: bold; color: #fff;
+        }
+        .badge-critical { background: #dc3545; }
+        .badge-high { background: #fd7e14; }
+        .badge-medium { background: #ffc107; color: #333; }
+        .badge-low { background: #28a745; }
+        .badge-info { background: #17a2b8; }
+
+        /* 步骤列表 */
+        .steps { counter-reset: step; padding-left: 0; }
+        .steps li {
+            list-style: none; padding: 8px 0 8px 35px; position: relative;
+            border-left: 2px solid #dee2e6; margin-left: 15px;
+        }
+        .steps li::before {
+            counter-increment: step; content: counter(step);
+            position: absolute; left: -14px; top: 7px;
+            background: #16213e; color: #fff; width: 26px; height: 26px;
+            border-radius: 50%; text-align: center; line-height: 26px; font-size: 0.85em;
+        }
+
+        /* 风险矩阵柱状图 */
+        .risk-bar { display: flex; align-items: center; margin: 8px 0; }
+        .risk-bar .bar-label { width: 80px; font-weight: bold; font-size: 0.9em; }
+        .risk-bar .bar-fill {
+            height: 24px; border-radius: 4px; min-width: 2px;
+            display: flex; align-items: center; padding-left: 8px;
+            color: #fff; font-size: 0.85em; font-weight: bold;
+            transition: width 0.5s;
+        }
+
+        /* 返回顶部 */
+        .back-to-top {
+            position: fixed; bottom: 20px; right: 20px;
+            background: #16213e; color: #fff; border: none;
+            border-radius: 50%; width: 50px; height: 50px;
+            font-size: 20px; cursor: pointer; display: none;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+        .back-to-top:hover { background: #0f3460; }
+
+        /* 打印样式 */
+        @media print {
+            body { background: #fff; padding: 0; }
+            .container { box-shadow: none; padding: 20px; }
+            .vuln-card { page-break-inside: avoid; }
+            .search-filter, .toc, .back-to-top { display: none; }
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .vuln-meta { grid-template-columns: 1fr; }
+            .search-filter { display: flex; flex-direction: column; }
+            .search-filter input, .search-filter select, .search-filter button {
+                margin: 5px 0; width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>{{ project.project_name }}</h1>
+    <div class="meta">
+        <span>生成时间: {{ generated_at }}</span>
+        {% if project.client %}<span>客户: {{ project.client }}</span>{% endif %}
+        {% if project.tester %}<span>测试人员: {{ project.tester }}</span>{% endif %}
+        {% if project.test_start %}<span>测试时间: {{ project.test_start }} 至 {{ project.test_end }}</span>{% endif %}
+    </div>
+
+    <!-- 目录导航 -->
+    <div class="toc">
+        <h3>目录</h3>
+        <ul>
+            <li><a href="#summary">1. 执行摘要</a></li>
+            <li><a href="#stats">2. 发现统计</a></li>
+            <li><a href="#assets">3. 资产清单</a></li>
+            <li><a href="#vulns">4. 漏洞详情 ({{ stats.total_vulns }} 个)</a></li>
+            <li><a href="#risk-matrix">5. 风险矩阵</a></li>
+        </ul>
+    </div>
+
+    <!-- 搜索过滤 -->
+    <div class="search-filter" id="search-filter">
+        <input type="text" id="searchInput" placeholder="搜索漏洞名称或描述...">
+        <select id="severityFilter">
+            <option value="">所有等级</option>
+            <option value="critical">严重</option>
+            <option value="high">高危</option>
+            <option value="medium">中危</option>
+            <option value="low">低危</option>
+            <option value="info">信息</option>
+        </select>
+        <button onclick="filterVulns()">筛选</button>
+        <button onclick="resetFilter()">重置</button>
+    </div>
+
+    <h2 id="summary">1. 执行摘要</h2>
+    <p>{{ executive_summary }}</p>
+
+    <h2 id="stats">2. 发现统计</h2>
+    <div class="stats-grid">
+        <div class="stat-card stat-critical">
+            <div class="number">{{ stats.critical }}</div>
+            <div class="label">严重</div>
+        </div>
+        <div class="stat-card stat-high">
+            <div class="number">{{ stats.high }}</div>
+            <div class="label">高危</div>
+        </div>
+        <div class="stat-card stat-medium">
+            <div class="number">{{ stats.medium }}</div>
+            <div class="label">中危</div>
+        </div>
+        <div class="stat-card stat-low">
+            <div class="number">{{ stats.low }}</div>
+            <div class="label">低危</div>
+        </div>
+        <div class="stat-card stat-info">
+            <div class="number">{{ stats.info }}</div>
+            <div class="label">信息</div>
+        </div>
+    </div>
+
+    <h2 id="assets">3. 资产清单</h2>
+    <p>共发现 <strong>{{ stats.total_hosts }}</strong> 台主机，<strong>{{ stats.open_ports }}</strong> 个开放端口。</p>
+
+    {% for host in hosts %}
+    <h3>{{ host.ip }}{% if host.hostname %} ({{ host.hostname }}){% endif %}</h3>
+    {% if host.os %}<p><strong>操作系统:</strong> {{ host.os }}</p>{% endif %}
+    {% if host.services %}
+    <table>
+        <thead><tr><th>端口</th><th>协议</th><th>服务</th><th>版本</th><th>状态</th></tr></thead>
+        <tbody>
+        {% for svc in host.services %}
+        <tr><td>{{ svc.port }}</td><td>{{ svc.protocol }}</td><td>{{ svc.service }}</td><td>{{ svc.version }}</td><td>{{ svc.state }}</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+    {% endfor %}
+
+    <h2 id="vulns">4. 漏洞详情</h2>
+
+    <div id="vuln-list">
+    {% for vuln in vulnerabilities %}
+    <div class="vuln-card" data-severity="{{ vuln.severity.value }}" data-name="{{ vuln.name }}" data-description="{{ vuln.description }}">
+        <div class="vuln-header severity-{{ vuln.severity.value }}" onclick="toggleVuln(this)">
+            <span>{{ loop.index }}. {{ vuln.name }}</span>
+            <span class="badge badge-{{ vuln.severity.value }}">{{ severity_labels[vuln.severity.value] }}{% if vuln.cvss_score %} ({{ vuln.cvss_score }}){% endif %}</span>
+        </div>
+        <div class="vuln-body">
+            <div class="vuln-meta">
+                {% if vuln.cve_ids %}<div class="vuln-meta-item"><strong>CVE:</strong> {{ vuln.cve_ids | join(", ") }}</div>{% endif %}
+                {% if vuln.cwe_ids %}<div class="vuln-meta-item"><strong>CWE:</strong> {{ vuln.cwe_ids | join(", ") }}</div>{% endif %}
+                {% if vuln.owasp_category %}<div class="vuln-meta-item"><strong>OWASP:</strong> {{ vuln.owasp_category }}</div>{% endif %}
+                <div class="vuln-meta-item"><strong>受影响资产:</strong> {{ vuln.affected_asset }}</div>
+            </div>
+
+            <h4>漏洞描述</h4>
+            <p>{{ vuln.description }}</p>
+
+            {% if vuln.reproduction_steps %}
+            <h4>复现步骤</h4>
+            <ol class="steps">
+                {% for step in vuln.reproduction_steps %}
+                <li>{{ step }}</li>
+                {% endfor %}
+            </ol>
+            {% endif %}
+
+            {% if vuln.impact %}
+            <h4>影响分析</h4>
+            <p>{{ vuln.impact }}</p>
+            {% endif %}
+
+            {% if vuln.remediation %}
+            <h4>修复建议</h4>
+            <p>{{ vuln.remediation }}</p>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+    </div>
+
+    <h2 id="risk-matrix">5. 风险矩阵</h2>
+    {% set max_count = [stats.critical, stats.high, stats.medium, stats.low, stats.info] | max %}
+    {% if max_count > 0 %}
+    {% for sev, label in [("critical", "严重"), ("high", "高危"), ("medium", "中危"), ("low", "低危"), ("info", "信息")] %}
+    <div class="risk-bar">
+        <span class="bar-label">{{ label }}</span>
+        <div class="bar-fill severity-{{ sev }}" style="width: {{ (stats[sev] / max_count * 300) | int }}px;">{{ stats[sev] }}</div>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    <hr style="margin: 40px 0 20px;">
+    <p style="text-align: center; color: #6c757d; font-size: 0.9em;">本报告由渗透测试报告智能体自动生成</p>
+</div>
+
+<!-- 返回顶部按钮 -->
+<button class="back-to-top" onclick="scrollToTop()" id="backToTop">↑</button>
+
+<script>
+// 切换漏洞详情显示
+function toggleVuln(header) {
+    const body = header.nextElementSibling;
+    body.style.display = body.style.display === 'none' ? 'block' : 'none';
+}
+
+// 筛选漏洞
+function filterVulns() {
+    const searchText = document.getElementById('searchInput').value.toLowerCase();
+    const severity = document.getElementById('severityFilter').value;
+    const vulnCards = document.querySelectorAll('.vuln-card');
+
+    vulnCards.forEach(card => {
+        const name = card.dataset.name.toLowerCase();
+        const description = card.dataset.description.toLowerCase();
+        const cardSeverity = card.dataset.severity;
+
+        const matchSearch = !searchText || name.includes(searchText) || description.includes(searchText);
+        const matchSeverity = !severity || cardSeverity === severity;
+
+        card.style.display = matchSearch && matchSeverity ? 'block' : 'none';
+    });
+}
+
+// 重置筛选
+function resetFilter() {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('severityFilter').value = '';
+    document.querySelectorAll('.vuln-card').forEach(card => {
+        card.style.display = 'block';
+    });
+}
+
+// 返回顶部
+function scrollToTop() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// 显示/隐藏返回顶部按钮
+window.onscroll = function() {
+    const btn = document.getElementById('backToTop');
+    btn.style.display = window.scrollY > 300 ? 'block' : 'none';
+};
+
+// 键盘快捷键
+document.addEventListener('keydown', function(e) {
+    // Ctrl + F 聚焦搜索框
+    if (e.ctrlKey && e.key === 'f') {
+        e.preventDefault();
+        document.getElementById('searchInput').focus();
+    }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,31 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src"]
+
+[project]
+name = "pentest-report-agent"
+version = "0.1.0"
+description = "渗透测试报告智能体 - 自动收集、分析、生成渗透测试报告"
+requires-python = ">=3.10"
+dependencies = [
+    "anthropic>=0.39.0",
+    "pydantic>=2.0",
+    "jinja2>=3.1",
+    "pyyaml>=6.0",
+    "lxml>=5.0",
+    "weasyprint>=62.0",
+    "python-docx>=1.1",
+    "rich>=13.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov>=5.0",
+]
+
+[project.scripts]
+pentest-agent = "src.main:main"
